@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
 from . import forms,models
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import Group
@@ -11,17 +10,17 @@ from django.core.mail import send_mail
 
 def home_view(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect('afterlogin')
+        return HttpResponseRedirect("library_app/afterlogin")
     return render(request, "library_app/index.html")
 
 def studentclick_view(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect('afterlogin')
+        return HttpResponseRedirect("library_app/afterlogin")
     return render(request, "library_app/studentclick.html")
 
 def adminclick_view(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect('afterlogin')
+        return HttpResponseRedirect("library_app/afterlogin")
     return render(request, 'library_app/adminclick.html')
 
 def adminsignup_view(request):
@@ -36,7 +35,7 @@ def adminsignup_view(request):
             my_admin_group = Group.objects.get_or_create(name='ADMIN')
             my_admin_group[0].user_set.add(user)
 
-            return HttpResponseRedirect('adminlogin')
+            return HttpResponseRedirect("library_app/adminlogin")
         return render(request,'library_app/adminsignup.html',{'form':form})
 
 def studentsignup_view(request):
@@ -56,7 +55,7 @@ def studentsignup_view(request):
 
             my_student_group = Group.objects.get_or_create(name='STUDENT')
             my_student_group[0].user_set.add(user)
-        return HttpResponseRedirect('studentlogin')
+        return HttpResponseRedirect("library_app/studentlogin")
     return render(request,'library_app/studentsignup.html',context=mydict)
 
 def is_admin(user):
@@ -122,8 +121,6 @@ def viewissuedbook_view(request):
         if d>15:
             day=d-15
             fine=day*10
-
-
         books=list(models.Book.objects.filter(isbn=ib.isbn))
         students=list(models.StudentExtra.objects.filter(enrollment=ib.enrollment))
         i=0
@@ -143,30 +140,29 @@ def viewstudent_view(request):
 
 @login_required(login_url='studentlogin')
 def viewissuedbookbystudent(request):
-    student=models.StudentExtra.objects.filter(user_id=request.user.id)
-    issuedbook=models.IssuedBook.objects.filter(enrollment=student[0].enrollment)
+    student = models.StudentExtra.objects.filter(user_id=request.user.id)
+    issuedbook = models.IssuedBook.objects.filter(enrollment=student[0].enrollment)
 
-    li1=[]
+    li1 = []
 
-    li2=[]
+    li2 = []
     for ib in issuedbook:
-        books=models.Book.objects.filter(isbn=ib.isbn)
+        books = models.Book.objects.filter(isbn=ib.isbn)
         for book in books:
-            t=(request.user,student[0].enrollment,student[0].branch,book.name,book.author)
+            t = (request.user, student[0].enrollment, student[0].branch, book.name, book.author)
             li1.append(t)
-        issdate=str(ib.issuedate.day)+'-'+str(ib.issuedate.month)+'-'+str(ib.issuedate.year)
-        expdate=str(ib.expirydate.day)+'-'+str(ib.expirydate.month)+'-'+str(ib.expirydate.year)
-        #fine calculation
-        days=(date.today()-ib.issuedate)
+        issdate = str(ib.issuedate.day) + '-' + str(ib.issuedate.month) + '-' + str(ib.issuedate.year)
+        expdate = str(ib.expirydate.day) + '-' + str(ib.expirydate.month) + '-' + str(ib.expirydate.year)
+        # fine calculation
+        days = (date.today() - ib.issuedate)
         print(date.today())
-        d=days.days
-        fine=0
-        if d>15:
-            day=d-15
-            fine=day*10
-        t=(issdate,expdate,fine)
+        d = days.days
+        fine = 0
+        if d > 15:
+            day = d - 15
+            fine = day * 10
+        t = (issdate, expdate, fine)
         li2.append(t)
-
     return render(request,'library_app/viewissuedbookbystudent.html',{'li1':li1,'li2':li2})
 
 def aboutus_view(request):
